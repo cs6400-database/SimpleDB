@@ -15,6 +15,8 @@ import java.util.*;
  */
 public class HeapFile implements DbFile {
 
+    private File file;
+    private TupleDesc tupleDesc;
     /**
      * Constructs a heap file backed by the specified file.
      * 
@@ -23,7 +25,8 @@ public class HeapFile implements DbFile {
      *            file.
      */
     public HeapFile(File f, TupleDesc td) {
-        // some code goes here
+        this.file = f;
+        this.tupleDesc = td;
     }
 
     /**
@@ -32,8 +35,7 @@ public class HeapFile implements DbFile {
      * @return the File backing this HeapFile on disk.
      */
     public File getFile() {
-        // some code goes here
-        return null;
+        return file;
     }
 
     /**
@@ -46,8 +48,7 @@ public class HeapFile implements DbFile {
      * @return an ID uniquely identifying this HeapFile.
      */
     public int getId() {
-        // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        return file.getAbsoluteFile().hashCode();
     }
 
     /**
@@ -56,28 +57,46 @@ public class HeapFile implements DbFile {
      * @return TupleDesc of this DbFile.
      */
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        return tupleDesc;
     }
 
     // see DbFile.java for javadocs
     public Page readPage(PageId pid) {
-        // some code goes here
+        int offset = BufferPool.getPageSize() * pid.pageNumber();
+        byte[] data = new byte[BufferPool.getPageSize()];
+        try {
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            raf.seek(offset);
+            raf.read(data);
+            raf.close();
+            return new HeapPage((HeapPageId) pid, data);
+        } catch (FileNotFoundException fe) {
+            fe.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
         return null;
     }
 
     // see DbFile.java for javadocs
     public void writePage(Page page) throws IOException {
-        // some code goes here
-        // not necessary for proj1
+        int offset = BufferPool.getPageSize() * page.getId().pageNumber();
+        byte[] data = page.getPageData();
+        try {
+            RandomAccessFile raf = new RandomAccessFile(file, "rw");
+            raf.seek(offset);
+            raf.write(data);
+            raf.close();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        } 
     }
 
     /**
      * Returns the number of pages in this HeapFile.
      */
     public int numPages() {
-        // some code goes here
-        return 0;
+        return (int) Math.ceil((double) file.length() / BufferPool.getPageSize());
     }
 
     // see DbFile.java for javadocs
@@ -98,8 +117,118 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public DbFileIterator iterator(TransactionId tid) {
-        // some code goes here
-        return null;
+        return new HeapFileIterator(tid, this.getId(), this.numPages());
+    }
+
+    public class HeapFileIterator implements DbFileIterator {
+        private TransactionId tid;
+        int pageCounter;
+        int tableId;
+        int numPages;
+        Page page;
+        Iterator<Tuple> tuples;
+        HeapPageId pid;
+        
+        /**
+         * Constructor for Iterator
+         * 
+         * @param tid TransactionId of requesting transaction
+         * @param tableId id of the HeapFile
+         * @param numPages number of pages in file
+         */
+        public HeapFileIterator(TransactionId tid, int tableId, int numPages) {
+            this.tid = tid;
+            this.pageCounter = 0;
+            this.tableId = tableId;
+            this.numPages = numPages;
+        }
+        
+        /**
+         * Gets tuples from file with given page number
+         * 
+         * @param pageNumber
+         * @return Iterator &lt; Tuples &gt; Iterator for tuples in the page
+         * @throws DbException
+         * @throws TransactionAbortedException 
+         */
+        private Iterator<Tuple> getTuples(int pageNumber) throws  DbException, TransactionAbortedException {
+            pid = new HeapPageId(tableId, pageNumber);
+            HeapPage heapPage = (HeapPage) Database.getBufferPool()
+                    .getPage(tid, pid, Permissions.READ_ONLY);
+            return heapPage.iterator();
+        }
+
+        /**
+         * Opens it iterator for iteration
+         * 
+         * @throws DbException
+         * @throws TransactionAbortedException 
+         */
+        public void open() throws DbException, TransactionAbortedException {
+            pageCounter = 0;
+            tuples = getTuples(pageCounter);
+        }
+
+        /**
+         * Checks if iterator has next tuple
+         * 
+         * @return boolean true if exists
+         * @throws DbException
+         * @throws TransactionAbortedException 
+         */
+        public boolean hasNext() throws DbException, TransactionAbortedException {
+            // If there are no tuples
+            if(tuples == null)
+                return false;
+            // Check if tuple has next
+            if(tuples.hasNext())
+                return true;
+            // Check if all pages are iterated
+            if(pageCounter + 1 >= numPages)
+                return false;
+            // Else check if there is next page
+            // If Page is exhausted get new page tuples
+            while(pageCounter + 1 < numPages && !tuples.hasNext()){
+                // Get tuples of next page
+                pageCounter++;
+                tuples = getTuples(pageCounter);
+            }
+            return this.hasNext();
+        }
+
+        /**
+         * Get next tuple in this file 
+         * 
+         * @return
+         * @throws DbException
+         * @throws TransactionAbortedException
+         * @throws NoSuchElementException 
+         */
+        public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
+            // If there are no tuples, throw exception
+            if(tuples == null) 
+                throw new NoSuchElementException();
+            return tuples.next();
+        }
+
+        /**
+         * Rewinds iterator to the start of file
+         * 
+         * @throws DbException
+         * @throws TransactionAbortedException 
+         */
+        public void rewind() throws DbException, TransactionAbortedException {
+            close();
+            open();
+        }
+
+        /**
+         * Close the iterator
+         */
+        public void close() {
+            tuples = null;
+            pid = null;
+        }
     }
 
 }
