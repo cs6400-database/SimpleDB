@@ -1,14 +1,14 @@
 package simpledb.systemtest;
 
-import static org.junit.Assert.*;
+import junit.framework.Assert;
+import org.junit.Test;
+import simpledb.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.junit.Test;
-
-import junit.framework.Assert;
-import simpledb.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Creates a heap file with 1024*500 tuples with two integer fields each.  Clears the buffer pool,
@@ -26,7 +26,9 @@ public class EvictionTest extends SimpleDbTestBase {
         System.out.println("EvictionTest scanning large table");
         Database.resetBufferPool(BUFFER_PAGES);
         long beginMem = SystemTestUtil.getMemoryFootprint();
-        SeqScan scan = new SeqScan(null, f.getId(), "");
+        Transaction t = new Transaction();
+        t.start();
+        SeqScan scan = new SeqScan(t.getId(), f.getId(), "");
         scan.open();
         while (scan.hasNext()) {
             scan.next();

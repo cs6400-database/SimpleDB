@@ -1,10 +1,12 @@
 package simpledb;
 
-import java.io.*;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * BufferPool manages the reading and writing of pages into memory from
  * disk. Access methods call into it to retrieve pages, and it fetches
@@ -26,6 +28,9 @@ public class BufferPool {
     private int numPages;
     private Map<PageId, Page> pid2page;
 
+    private final LockManager lockManager;
+    private final Map<TransactionId, Set<PageId>> txUsedPage;
+
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
@@ -33,7 +38,9 @@ public class BufferPool {
      */
     public BufferPool(int numPages) {
         this.numPages = numPages;
-        pid2page = new HashMap<PageId, Page>();
+        pid2page = new ConcurrentHashMap<>();
+        lockManager = new LockManager();
+        txUsedPage = new ConcurrentHashMap<>();
     }
 
     public static int getPageSize() {
@@ -57,12 +64,20 @@ public class BufferPool {
      */
     public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
+
+
+        lockManager.grantWriteLock(tid, pid);
+        if (!txUsedPage.containsKey(tid))
+            txUsedPage.put(tid, new HashSet<>());
+        txUsedPage.get(tid).add(pid);
+
+
         if (!pid2page.containsKey(pid)) {
             if (pid2page.size() == numPages) {
                 evictPage();
-            } else {
-                pid2page.put(pid, Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid));
             }
+            pid2page.put(pid, Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid));
+
         }
         return pid2page.get(pid);
     }
@@ -79,6 +94,8 @@ public class BufferPool {
     public  void releasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for proj1
+        lockManager.releaseLock(tid, pid);
+        txUsedPage.get(tid).remove(pid);
     }
 
     /**
@@ -89,13 +106,14 @@ public class BufferPool {
     public void transactionComplete(TransactionId tid) throws IOException {
         // some code goes here
         // not necessary for proj1
+        transactionComplete(tid, true);
     }
 
     /** Return true if the specified transaction has a lock on the specified page */
     public boolean holdsLock(TransactionId tid, PageId p) {
         // some code goes here
         // not necessary for proj1
-        return false;
+        return lockManager.checkHoldLock(tid, p);
     }
 
     /**
@@ -109,6 +127,14 @@ public class BufferPool {
         throws IOException {
         // some code goes here
         // not necessary for proj1
+
+        if (commit) {
+            flushPages(tid);
+        } else {
+            discardPages(tid);
+        }
+        lockManager.commitTX(tid);
+        txUsedPage.remove(tid);
     }
 
     /**
@@ -181,6 +207,8 @@ public class BufferPool {
     public synchronized void discardPage(PageId pid) {
         // some code goes here
 	// not necessary for proj1
+        pid2page.remove(pid);
+        pid2page.put(pid, Database.getCatalog().getDbFile(pid.getTableId()).readPage(pid));
     }
 
     /**
@@ -202,8 +230,26 @@ public class BufferPool {
     public synchronized  void flushPages(TransactionId tid) throws IOException {
         // some code goes here
         // not necessary for proj1
+        if (txUsedPage.get(tid) != null) {
+            for (PageId pid : txUsedPage.get(tid)) {
+                if (pid2page.containsKey(pid))
+                    flushPage(pid);
+            }
+        }
     }
 
+    /**
+     * Discard all pages of the specified transaction to disk.
+     */
+    public synchronized void discardPages(TransactionId tid) throws IOException {
+        // some code goes here
+        // not necessary for proj1
+        if (txUsedPage.get(tid) != null) {
+            for (PageId pid : txUsedPage.get(tid)) {
+                discardPage(pid);
+            }
+        }
+    }
     /**
      * Discards a page from the buffer pool.
      * Flushes the page to disk to ensure dirty pages are updated on disk.
@@ -211,6 +257,17 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for proj1
+        boolean evicted = false;
+        for (Map.Entry<PageId, Page> entry : pid2page.entrySet()) {
+            try {
+                flushPage(entry.getKey());
+                pid2page.remove(entry.getKey());
+                evicted = true;
+                break;
+            } catch (IOException e) {
+                throw new DbException("");
+            }
+        }
     }
 
 }

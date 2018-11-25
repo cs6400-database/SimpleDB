@@ -1,14 +1,11 @@
 package simpledb;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import simpledb.systemtest.SimpleDbTestBase;
+
+import static org.junit.Assert.*;
 
 public class JoinTest extends SimpleDbTestBase {
 
@@ -22,7 +19,8 @@ public class JoinTest extends SimpleDbTestBase {
   /**
    * Initialize each unit test
    */
-  @Before public void createTupleLists() throws Exception {
+  @Before
+  public void createTupleLists() throws Exception {
     this.scan1 = TestUtil.createTupleList(width1,
         new int[] { 1, 2,
                     3, 4,
@@ -56,7 +54,8 @@ public class JoinTest extends SimpleDbTestBase {
   /**
    * Unit test for Join.getTupleDesc()
    */
-  @Test public void getTupleDesc() {
+  @Test
+  public void getTupleDesc() {
     JoinPredicate pred = new JoinPredicate(0, Predicate.Op.EQUALS, 0);
     Join op = new Join(pred, scan1, scan2);
     TupleDesc expected = Utility.getTupleDesc(width1 + width2);
@@ -67,7 +66,8 @@ public class JoinTest extends SimpleDbTestBase {
   /**
    * Unit test for Join.rewind()
    */
-  @Test public void rewind() throws Exception {
+  @Test
+  public void rewind() throws Exception {
     JoinPredicate pred = new JoinPredicate(0, Predicate.Op.EQUALS, 0);
     Join op = new Join(pred, scan1, scan2);
     op.open();
@@ -86,7 +86,8 @@ public class JoinTest extends SimpleDbTestBase {
   /**
    * Unit test for Join.getNext() using a &gt; predicate
    */
-  @Test public void gtJoin() throws Exception {
+  @Test
+  public void gtJoin() throws Exception {
     JoinPredicate pred = new JoinPredicate(0, Predicate.Op.GREATER_THAN, 0);
     Join op = new Join(pred, scan1, scan2);
     op.open();
@@ -97,7 +98,8 @@ public class JoinTest extends SimpleDbTestBase {
   /**
    * Unit test for Join.getNext() using an = predicate
    */
-  @Test public void eqJoin() throws Exception {
+  @Test
+  public void eqJoin() throws Exception {
     JoinPredicate pred = new JoinPredicate(0, Predicate.Op.EQUALS, 0);
     Join op = new Join(pred, scan1, scan2);
     op.open();

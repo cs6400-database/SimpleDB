@@ -1,9 +1,14 @@
 package simpledb;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TestUtil {
     /**
@@ -25,7 +30,7 @@ public class TestUtil {
      */
     public static TupleIterator createTupleList(int width, int[] tupdata) {
         int i = 0;
-        ArrayList<Tuple> tuplist = new ArrayList<Tuple>();
+        ArrayList<Tuple> tuplist = new ArrayList<>();
         while (i < tupdata.length) {
             Tuple tup = new Tuple(Utility.getTupleDesc(width));
             for (int j = 0; j < width; ++j)
@@ -69,7 +74,7 @@ public class TestUtil {
                 Field f;
                 Object t = tupdata[i++];
                 if (t instanceof String)
-                    f = new StringField((String)t, Type.STRING_LEN); 
+                    f = new StringField((String) t, Type.STRING_LEN);
                 else
                     f = new IntField((Integer)t);
 
@@ -135,8 +140,9 @@ public class TestUtil {
             matched = false;
             actual.rewind();
 
+            Tuple next = null;
             while (actual.hasNext()) {
-                Tuple next = actual.next();
+                next = actual.next();
                 if (compareTuples(expectedTup, next)) {
                     matched = true;
                     break;
@@ -236,7 +242,7 @@ public class TestUtil {
             throw new RuntimeException("not implemented");
         }
 
-		public TupleDesc getTupleDesc() {			
+        public TupleDesc getTupleDesc() {
 			return td;
 		}
     }
@@ -344,7 +350,7 @@ public class TestUtil {
 
                 try {
                     Database.getBufferPool().transactionComplete(tid, false);
-                } catch (java.io.IOException e2) {
+                } catch (IOException e2) {
                     e2.printStackTrace();
                 }
             }
