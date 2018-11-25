@@ -1,8 +1,10 @@
 package simpledb;
 
 import java.io.*;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 /**
  * BufferPool manages the reading and writing of pages into memory from
  * disk. Access methods call into it to retrieve pages, and it fetches
@@ -126,6 +128,11 @@ public class BufferPool {
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
+        HeapFile table = (HeapFile) Database.getCatalog().getDbFile(tableId);
+        ArrayList<Page> affectedPages = table.insertTuple(tid, t);
+        for (Page page : affectedPages) {
+            page.markDirty(true, tid);
+        }
         // not necessary for proj1
     }
 
@@ -144,6 +151,10 @@ public class BufferPool {
      */
     public  void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, TransactionAbortedException {
+        int tableId = t.getRecordId().getPageId().getTableId();
+        HeapFile table = (HeapFile) Database.getCatalog().getDbFile(tableId);
+        Page affectedPage = table.deleteTuple(tid, t);
+        affectedPage.markDirty(true, tid);
         // some code goes here
         // not necessary for proj1
     }
@@ -156,6 +167,9 @@ public class BufferPool {
     public synchronized void flushAllPages() throws IOException {
         // some code goes here
         // not necessary for proj1
+        for (PageId key : pid2page.keySet()) {
+            flushPage(key);
+        }
 
     }
 
@@ -176,6 +190,11 @@ public class BufferPool {
     private synchronized  void flushPage(PageId pid) throws IOException {
         // some code goes here
         // not necessary for proj1
+        Page page = pid2page.get(pid);
+        int tableId = ((HeapPageId)pid).getTableId();
+        HeapFile hf = (HeapFile)Database.getCatalog().getDbFile(tableId);
+        hf.writePage(page);
+        page.markDirty(false, null);
     }
 
     /** Write all pages of the specified transaction to disk.

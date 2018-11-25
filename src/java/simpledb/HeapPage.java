@@ -19,6 +19,8 @@ public class HeapPage implements Page {
     Tuple tuples[];
     int numSlots;
 
+    private TransactionId lastDirtyOperation;
+
     byte[] oldData;
 
     /**
@@ -230,6 +232,14 @@ public class HeapPage implements Page {
     public void deleteTuple(Tuple t) throws DbException {
         // some code goes here
         // not necessary for lab1
+        RecordId tid = t.getRecordId();
+        HeapPageId hpid = (HeapPageId) tid.getPageId();
+        int tupleNum = tid.tupleno();
+        if (!hpid.equals(pid) || !isSlotUsed(tupleNum)) {
+            throw new DbException("this tuple is not on this page, or tuple slot is already empty");
+        }
+        tuples[tupleNum] = null;
+        markSlotUsed(tupleNum, false);
     }
 
     /**
@@ -242,6 +252,16 @@ public class HeapPage implements Page {
     public void insertTuple(Tuple t) throws DbException {
         // some code goes here
         // not necessary for lab1
+        if (!td.equals(t.getTupleDesc())) throw new DbException("tupleDesc is mismatch");
+        for (int i = 0; i < getNumTuples(); i++) {
+            if (!isSlotUsed(i)) {
+                tuples[i] = t;
+                t.setRecordId(new RecordId(pid, i));
+                markSlotUsed(i, true);
+                return;
+            }
+        }
+        throw new DbException("the page is full (no empty slots)");
     }
 
     /**
@@ -251,6 +271,7 @@ public class HeapPage implements Page {
     public void markDirty(boolean dirty, TransactionId tid) {
         // some code goes here
 	// not necessary for lab1
+        lastDirtyOperation = dirty ? tid : null;
     }
 
     /**
@@ -259,7 +280,7 @@ public class HeapPage implements Page {
     public TransactionId isDirty() {
         // some code goes here
 	// Not necessary for lab1
-        return null;      
+        return lastDirtyOperation;
     }
 
     /**
@@ -285,12 +306,22 @@ public class HeapPage implements Page {
         return true;
     }
 
+    private byte editBitInByte(byte target, int posInByte, boolean value) {
+        if (posInByte < 0 || posInByte > 7) {
+            throw new IllegalArgumentException();
+        }
+        byte b = (byte) (1 << posInByte);
+        return value ? (byte) (target | b) : (byte) (target & ~b);
+    }
     /**
      * Abstraction to fill or clear a slot on this page.
      */
     private void markSlotUsed(int i, boolean value) {
         // some code goes here
         // not necessary for lab1
+        int byteNum = i / 8;
+        int posInByte = i % 8;
+        header[byteNum] = editBitInByte(header[byteNum], posInByte, value);
     }
 
     /**

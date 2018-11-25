@@ -9,6 +9,7 @@ public class Predicate implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+
     /** Constants used for return codes in Field.compare */
     public enum Op implements Serializable {
         EQUALS, GREATER_THAN, LESS_THAN, LESS_THAN_OR_EQ, GREATER_THAN_OR_EQ, LIKE, NOT_EQUALS;
@@ -64,8 +65,14 @@ public class Predicate implements Serializable {
      * @param operand
      *            field value to compare passed in tuples to
      */
+    private int f;
+    private Op o;
+    private Field ope;
     public Predicate(int field, Op op, Field operand) {
         // some code goes here
+        f=field;
+        o=op;
+        ope=operand;
     }
 
     /**
@@ -74,7 +81,7 @@ public class Predicate implements Serializable {
     public int getField()
     {
         // some code goes here
-        return -1;
+        return f;
     }
 
     /**
@@ -83,7 +90,7 @@ public class Predicate implements Serializable {
     public Op getOp()
     {
         // some code goes here
-        return null;
+        return o;
     }
     
     /**
@@ -92,7 +99,7 @@ public class Predicate implements Serializable {
     public Field getOperand()
     {
         // some code goes here
-        return null;
+        return ope;
     }
     
     /**
@@ -107,7 +114,7 @@ public class Predicate implements Serializable {
      */
     public boolean filter(Tuple t) {
         // some code goes here
-        return false;
+        return t.getField(f).compare(o,ope);
     }
 
     /**
@@ -116,6 +123,9 @@ public class Predicate implements Serializable {
      */
     public String toString() {
         // some code goes here
-        return "";
+        StringBuilder builder = new StringBuilder();
+        builder.append("(tuple x).fields[").append(f).append("] ")
+                .append(o.toString()).append(" ").append(ope).append(" ?");
+        return builder.toString();
     }
 }
