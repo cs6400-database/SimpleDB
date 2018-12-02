@@ -91,6 +91,17 @@ public class Query implements Serializable {
         op.close();
         started = false;
     }
+    public List<Tuple> exec() throws IOException, DbException, TransactionAbortedException {
+
+        this.start();
+        ArrayList<Tuple> res=new ArrayList<>();
+        while (this.hasNext()) {
+            Tuple tup = this.next();
+            res.add(tup);
+        }
+        this.close();
+        return res;
+    }
 
     public void execute() throws IOException, DbException, TransactionAbortedException {
         TupleDesc td = this.getOutputTupleDesc();

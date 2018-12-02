@@ -501,7 +501,83 @@ public class Parser {
             throw new RuntimeException(e);
         }
     }
+    public List<Tuple> processNxt(InputStream is) {
+        try {
+            ZqlParser p = new ZqlParser(is);
+            ZStatement s = p.readStatement();
 
+            Query query = null;
+            if (s instanceof ZTransactStmt)
+                handleTransactStatement((ZTransactStmt) s);
+            else {
+                if (!this.inUserTrans) {
+                    curtrans = new Transaction();
+                    curtrans.start();
+                    System.out.println("Started a new transaction tid = "
+                            + curtrans.getId().getId());
+                }
+                try {
+                    if (s instanceof ZInsert)
+                        query = handleInsertStatement((ZInsert) s,
+                                curtrans.getId());
+                    else if (s instanceof ZDelete)
+                        query = handleDeleteStatement((ZDelete) s,
+                                curtrans.getId());
+                    else if (s instanceof ZQuery)
+                        query = handleQueryStatement((ZQuery) s,
+                                curtrans.getId());
+                    else {
+                        System.out
+                                .println("Can't parse "
+                                        + s
+                                        + "\n -- parser only handles SQL transactions, insert, delete, and select statements");
+                    }
+                    if (!inUserTrans && curtrans != null) {
+                        curtrans.commit();
+                        System.out.println("Transaction "
+                                + curtrans.getId().getId() + " committed.");
+                    }
+                    if (query != null)
+                        return query.exec();
+
+                } catch (Throwable a) {
+                    // Whenever error happens, abort the current transaction
+                    if (curtrans != null) {
+                        curtrans.abort();
+                        System.out.println("Transaction "
+                                + curtrans.getId().getId()
+                                + " aborted because of unhandled error");
+                    }
+                    this.inUserTrans = false;
+
+                    if (a instanceof simpledb.ParsingException
+                            || a instanceof Zql.ParseException)
+                        throw new ParsingException((Exception) a);
+                    if (a instanceof Zql.TokenMgrError)
+                        throw (Zql.TokenMgrError) a;
+                    throw new DbException(a.getMessage());
+                } finally {
+                    if (!inUserTrans)
+                        curtrans = null;
+                }
+            }
+
+        } catch (TransactionAbortedException e) {
+            e.printStackTrace();
+        } catch (DbException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (simpledb.ParsingException e) {
+            System.out
+                    .println("Invalid SQL expression: \n \t" + e.getMessage());
+        } catch (Zql.ParseException e) {
+            System.out.println("Invalid SQL expression: \n \t " + e);
+        } catch (Zql.TokenMgrError e) {
+            System.out.println("Invalid SQL expression: \n \t " + e);
+        }
+        return null;
+    }
     public void processNextStatement(InputStream is) {
         try {
             ZqlParser p = new ZqlParser(is);
