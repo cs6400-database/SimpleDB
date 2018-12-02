@@ -45,7 +45,7 @@ public class SimpleDb {
             }
 
             HeapFileEncoder.convert(sourceTxtFile,targetDatFile,
-                        BufferPool.PAGE_SIZE,numOfAttributes,ts,fieldSeparator);
+                        BufferPool.getPageSize(),numOfAttributes,ts,fieldSeparator);
 
         } catch (IOException e) {
                 throw new RuntimeException(e);

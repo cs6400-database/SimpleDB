@@ -1,0 +1,146 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch)",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "",
+            "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ZEval<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "Zql.ZEval",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ZqlJJParser<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "Zql.ZqlJJParser",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ZqlParser<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "Zql.ZqlParser",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ANSIBuffer<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "jline.ANSIBuffer",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-ConsoleRunner<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "jline.ConsoleRunner",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Version<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "junit.runner.Version",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-TestRunner<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "junit.textui.TestRunner",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JUnitCore<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "org.junit.runner.JUnitCore",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-LogicalPlan<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "simpledb.LogicalPlan",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Parser<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "simpledb.Parser",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-SimpleDb<simpledb>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "simpledb.SimpleDb",
+            "args": "",
+            "projectName": "simpledb"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Attach)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": "<debug port of remote debuggee>"
+        }
+    ]
+}
