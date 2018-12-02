@@ -116,8 +116,6 @@ public class BufferPool {
      * @param tid the ID of the transaction requesting the unlock
      */
     public void transactionComplete(TransactionId tid) throws IOException {
-        // some code goes here
-        // not necessary for proj1
         transactionComplete(tid, true);
     }
 
@@ -232,14 +230,20 @@ public class BufferPool {
      * Flushes a certain page to disk
      * @param pid an ID indicating the page to flush
      */
-    private synchronized  void flushPage(PageId pid) throws IOException {
-        // some code goes here
-        // not necessary for proj1
+    private synchronized void flushPage(PageId pid) throws IOException {
         Page page = pid2page.get(pid);
-        int tableId = ((PageId)pid).getTableId();
-        DbFile hf = (DbFile)Database.getCatalog().getDbFile(tableId);
-        hf.writePage(page);
-        page.markDirty(false, null);
+        // append an update record to the log, with
+        // a before-image and after-image.
+        TransactionId dirtier = page.isDirty();
+        if (dirtier != null){
+            Database.getLogFile().logWrite(dirtier, page.getBeforeImage(), page);
+            Database.getLogFile().force();
+
+            int tableId = ((PageId)pid).getTableId();
+            DbFile hf = (DbFile)Database.getCatalog().getDbFile(tableId);
+            hf.writePage(page);
+            page.markDirty(false, null);
+        }
     }
 
     /** Write all pages of the specified transaction to disk.
