@@ -111,7 +111,7 @@ public class BTreeFile implements DbFile {
 					throw new IllegalArgumentException("Unable to read "
 							+ BufferPool.getPageSize() + " bytes from BTreeFile");
 				}
-				Debug.log(1, "BTreeFile.readPage: read page %d", id.getPageNumber());
+				Debug.log(1, "BTreeFile.readPage: read page %d", id.pageNumber());
 				if(id.pgcateg() == BTreePageId.INTERNAL) {
 					BTreeInternalPage p = new BTreeInternalPage(id, pageBuf, keyField);
 					return p;
@@ -900,7 +900,7 @@ public class BTreeFile implements DbFile {
 					rRightPage.setLeftSiblingId(leftPage.getId());
 			}
 
-			setEmptyPage(tid, dirtypages, rightPage.getId().getPageNumber());
+			setEmptyPage(tid, dirtypages, rightPage.getId().pageNumber());
 			this.deleteParentEntry(tid, dirtypages, leftPage, parent, parentEntry);
 	}
 
@@ -945,7 +945,7 @@ public class BTreeFile implements DbFile {
 					leftPage.insertEntry(e);
 			}
 			this.updateParentPointers(tid, dirtypages, leftPage);
-			setEmptyPage(tid, dirtypages, rightPage.getId().getPageNumber());
+			setEmptyPage(tid, dirtypages, rightPage.getId().pageNumber());
 			this.deleteParentEntry(tid, dirtypages, leftPage, parent, parentEntry);
 	}
 
@@ -989,7 +989,7 @@ public class BTreeFile implements DbFile {
 			rootPtr.setRootId(leftPage.getId());
 
 			// release the parent page for reuse
-			setEmptyPage(tid, dirtypages, parent.getId().getPageNumber());
+			setEmptyPage(tid, dirtypages, parent.getId().pageNumber());
 		}
 		else if(parent.getNumEmptySlots() > maxEmptySlots) {
 			handleMinOccupancyPage(tid, dirtypages, parent);
@@ -1011,7 +1011,7 @@ public class BTreeFile implements DbFile {
 			throws DbException, IOException, TransactionAbortedException {
 		HashMap<PageId, Page> dirtypages = new HashMap<PageId, Page>();
 
-		BTreePageId pageId = new BTreePageId(tableid, t.getRecordId().getPageId().getPageNumber(),
+		BTreePageId pageId = new BTreePageId(tableid, t.getRecordId().getPageId().pageNumber(),
 				BTreePageId.LEAF);
 		BTreeLeafPage page = (BTreeLeafPage) getPage(tid, dirtypages, pageId, Permissions.READ_WRITE);
 		page.deleteTuple(t);

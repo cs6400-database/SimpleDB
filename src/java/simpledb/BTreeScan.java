@@ -77,10 +77,10 @@ public class BTreeScan implements OpIterator {
 		this.alias = tableAlias;
 		this.tablename = Database.getCatalog().getTableName(tableid);
 		if(ipred == null) {
-			this.it = Database.getCatalog().getDatabaseFile(tableid).iterator(tid);
+			this.it = Database.getCatalog().getDbFile(tableid).iterator(tid);
 		}
 		else {
-			this.it = ((BTreeFile) Database.getCatalog().getDatabaseFile(tableid)).indexIterator(tid, ipred);
+			this.it = ((BTreeFile) Database.getCatalog().getDbFile(tableid)).indexIterator(tid, ipred);
 		}
 		myTd = Database.getCatalog().getTupleDesc(tableid);
 		String[] newNames = new String[myTd.numFields()];
