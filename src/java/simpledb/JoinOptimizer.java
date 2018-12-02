@@ -78,7 +78,7 @@ public class JoinOptimizer {
      * Estimate the cost of a join.
      * 
      * The cost of the join should be calculated based on the join algorithm (or
-     * algorithms) that you implemented for Lab 2. It should be a function of
+     * algorithms) that you implemented for Project 2. It should be a function of
      * the amount of data that must be read over the course of the query, as
      * well as the number of CPU opertions performed by your join. Assume that
      * the cost of a single predicate application is roughly 1.
@@ -104,14 +104,14 @@ public class JoinOptimizer {
             double cost1, double cost2) {
         if (j instanceof LogicalSubplanJoinNode) {
             // A LogicalSubplanJoinNode represents a subquery.
-            // You do not need to implement proper support for these for Lab 4.
+            // You do not need to implement proper support for these for Project 3.
             return card1 + cost1 + cost2;
         } else {
-            // Insert your code here.
+            // some code goes here.
             // HINT: You may need to use the variable "j" if you implemented
-            // a join algorithm that's more complicated than a basic
-            // nested-loops join.
-            return -1.0;
+            // a join algorithm that's more complicated than a basic nested-loops
+            // join.
+            return cost1 + card1 * cost2 + card1 * card2;
         }
     }
 
@@ -138,7 +138,7 @@ public class JoinOptimizer {
             boolean t1pkey, boolean t2pkey, Map<String, TableStats> stats) {
         if (j instanceof LogicalSubplanJoinNode) {
             // A LogicalSubplanJoinNode represents a subquery.
-            // You do not need to implement proper support for these for Lab 4.
+            // You do not need to implement proper support for these for Project 3.
             return card1;
         } else {
             return estimateTableJoinCardinality(j.p, j.t1Alias, j.t2Alias,
@@ -146,7 +146,6 @@ public class JoinOptimizer {
                     stats, p.getTableAliasToIdMapping());
         }
     }
-
     /**
      * Estimate the join cardinality of two tables.
      * */
@@ -157,6 +156,27 @@ public class JoinOptimizer {
             Map<String, Integer> tableAliasToId) {
         int card = 1;
         // some code goes here
+        if (joinOp == Predicate.Op.EQUALS && t1pkey && t2pkey) {
+            card = Math.min(card1, card2);
+        } else if (joinOp == Predicate.Op.EQUALS && t1pkey) {
+            card = card2;
+        } else if (joinOp == Predicate.Op.EQUALS && t2pkey) {
+            card = card1;
+        } else if (joinOp == Predicate.Op.EQUALS && !t1pkey && !t2pkey) {
+            // no primary key table, heristic
+            card = Math.max(card1, card2);
+        } else if (joinOp == Predicate.Op.NOT_EQUALS && t1pkey && t2pkey) {
+            card = card1 * card2 - (Math.min(card1, card2));
+        } else if (joinOp == Predicate.Op.NOT_EQUALS && t1pkey) {
+            card = card1 * card2 - card2;
+        } else if (joinOp == Predicate.Op.NOT_EQUALS && t2pkey) {
+            card = card1 * card2 - card1;
+        } else if (joinOp == Predicate.Op.NOT_EQUALS && !t1pkey && !t2pkey) {
+            card = (card1 * card2) - Math.max(card1, card2);
+        } else {
+            // range search heroistic
+            card = card1 * card2 / 3;
+        }
         return card <= 0 ? 1 : card;
     }
 
@@ -195,7 +215,7 @@ public class JoinOptimizer {
 
     /**
      * Compute a logical, reasonably efficient join on the specified tables. See
-     * PS4 for hints on how this should be implemented.
+     * project description for hints on how this should be implemented.
      * 
      * @param stats
      *            Statistics for each table involved in the join, referenced by
@@ -217,11 +237,36 @@ public class JoinOptimizer {
             HashMap<String, TableStats> stats,
             HashMap<String, Double> filterSelectivities, boolean explain)
             throws ParsingException {
-        //Not necessary for projs 1--3
+
+        // See the project writeup for some hints as to how this function
+        // should work.
 
         // some code goes here
         //Replace the following
-        return joins;
+        int numJoinNodes = joins.size();
+        PlanCache pc = new PlanCache();
+        Set<LogicalJoinNode> wholeSet = null;
+        for (int i = 1; i <= numJoinNodes; i++) {
+            Set<Set<LogicalJoinNode>> setOfSubset = this.enumerateSubsets(this.joins, i);
+            for (Set<LogicalJoinNode> s : setOfSubset) {
+                if (s.size() == numJoinNodes) {
+                    wholeSet = s;//将join节点的全集保存下来最后用
+                }
+                Double bestCostSofar = Double.MAX_VALUE;
+                CostCard bestPlan = new CostCard();
+                for (LogicalJoinNode toRemove : s) {
+                    CostCard plan = computeCostAndCardOfSubplan(stats, filterSelectivities, toRemove, s, bestCostSofar, pc);
+                    if (plan != null) {
+                        bestCostSofar = plan.cost;
+                        bestPlan = plan;
+                    }
+                }
+                if (bestPlan.plan != null) {
+                    pc.addPlan(s, bestPlan.cost, bestPlan.card, bestPlan.plan);
+                }
+            }
+        }
+        return pc.getOrder(wholeSet);
     }
 
     // ===================== Private Methods =================================
