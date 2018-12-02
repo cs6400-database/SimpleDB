@@ -1,5 +1,7 @@
 package simpledb;
 
+import java.io.*;
+
 /**
  * The delete operator. Delete reads tuples from its child operator and removes
  * them from the table they belong to.

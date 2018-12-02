@@ -175,12 +175,14 @@ public class BufferPool {
      * @param tid the transaction adding the tuple.
      * @param t the tuple to add
      */
-    public  void deleteTuple(TransactionId tid, Tuple t)
+    public void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, TransactionAbortedException {
         int tableId = t.getRecordId().getPageId().getTableId();
         HeapFile table = (HeapFile) Database.getCatalog().getDbFile(tableId);
-        Page affectedPage = table.deleteTuple(tid, t);
-        affectedPage.markDirty(true, tid);
+        ArrayList<Page> affectedPage = table.deleteTuple(tid, t);
+        for (Page newPage : affectedPage) {
+            newPage.markDirty(true, tid);
+        }
         // some code goes here
         // not necessary for proj1
     }

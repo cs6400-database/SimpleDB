@@ -141,18 +141,19 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
-    public Page deleteTuple(TransactionId tid, Tuple t) throws DbException,
+    public ArrayList<Page> deleteTuple(TransactionId tid, Tuple t) throws DbException,
             TransactionAbortedException {
+        ArrayList<Page> affectedPage = new ArrayList<>(1);
         PageId pid = t.getRecordId().getPageId();
-        HeapPage affectedPage = null;
         for (int i = 0; i < numPages(); i++) {
             if (i == pid.pageNumber()) {
-                affectedPage = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
-                affectedPage.deleteTuple(t);
-                affectedPage.markDirty(true, tid);
+                HeapPage heapPage = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
+                heapPage.deleteTuple(t);
+                heapPage.markDirty(true, tid);
+                affectedPage.add(heapPage);
             }
         }
-        if (affectedPage == null) {
+        if (affectedPage.get(0) == null) {
             throw new DbException("tuple " + t + " is not in this table");
         }
         return affectedPage;
