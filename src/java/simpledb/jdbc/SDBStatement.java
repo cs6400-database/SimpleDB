@@ -15,8 +15,8 @@ public class SDBStatement implements Statement {
     private Parser parser;
     private Connection connection;
 
-    public SDBStatement(Connection connection) {
-        parser = new Parser();
+    public SDBStatement(Connection connection, Parser parser) {
+        this.parser = parser;
         batches = new ArrayList<>();
         this.connection = connection;
     }

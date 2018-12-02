@@ -35,6 +35,7 @@ public class BufferPoolWriteTest extends TestUtil.CreateHeapFile {
     		ArrayList<Page> dirtypages = new ArrayList<Page>();
     		for(int i = 0; i < duplicates; i++) {
     			// create a blank page
+				this.numPage++;
     			BufferedOutputStream bw = new BufferedOutputStream(new FileOutputStream(super.getFile(), true));
                 byte[] emptyData = HeapPage.createEmptyPageData();
                 bw.write(emptyData);

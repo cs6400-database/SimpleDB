@@ -1,5 +1,7 @@
 package simpledb.jdbc;
 
+import simpledb.Parser;
+
 import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
@@ -7,9 +9,16 @@ import java.util.concurrent.Executor;
 
 public class SDBConnection implements Connection {
 
+    private Parser parser;
+    private boolean autocommit = true;
+
+    public SDBConnection() {
+        this.parser = new Parser();
+    }
+
     @Override
     public Statement createStatement() throws SQLException {
-        return new SDBStatement(this);
+        return new SDBStatement(this, parser);
     }
 
     @Override
@@ -29,22 +38,28 @@ public class SDBConnection implements Connection {
 
     @Override
     public boolean getAutoCommit() throws SQLException {
-        return false;
+        return autocommit;
     }
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-
+        if (!autoCommit) {
+            autocommit = autoCommit;
+            parser.processNextStatement("SET TRANSACTION");
+        } else
+            autocommit = autoCommit;
     }
 
     @Override
     public void commit() throws SQLException {
-
+        if (!autocommit)
+            parser.processNextStatement("COMMIT");
     }
 
     @Override
     public void rollback() throws SQLException {
-
+        if (!autocommit)
+            parser.processNextStatement("ROLLBACK");
     }
 
     @Override
