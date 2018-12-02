@@ -29,7 +29,7 @@ public class QueryTest {
 	public static HeapFile createDuplicateHeapFile(ArrayList<ArrayList<Integer>> tuples, int columns, String colPrefix) throws IOException {
         File temp = File.createTempFile("table", ".dat");
         temp.deleteOnExit();
-        HeapFileEncoder.convert(tuples, temp, BufferPool.PAGE_SIZE, columns);
+        HeapFileEncoder.convert(tuples, temp, BufferPool.getPageSize(), columns);
         return Utility.openHeapFile(columns, colPrefix, temp);
 	}
 	
