@@ -1,8 +1,7 @@
 package simpledb;
 
-import java.io.*;
-import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class HeapFile implements DbFile {
 
     private File file;
     private TupleDesc tupleDesc;
-    private int numPage;
+    protected int numPage;
     /**
      * Constructs a heap file backed by the specified file.
      * 
