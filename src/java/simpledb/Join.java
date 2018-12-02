@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -66,7 +67,7 @@ public class Join extends Operator {
         return TupleDesc.merge(child1.getTupleDesc(),child2.getTupleDesc());
     }
 
-    public void open() throws DbException, NoSuchElementException,
+    public void open() throws DbException, NoSuchElementException, IOException, 
             TransactionAbortedException {
         // some code goes here
         super.open();

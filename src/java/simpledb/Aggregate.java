@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -110,7 +111,7 @@ public class Aggregate extends Operator {
 	    return aop.toString();
     }
 
-    public void open() throws NoSuchElementException, DbException,
+    public void open() throws NoSuchElementException, DbException, IOException, 
 	    TransactionAbortedException {
 	// some code goes here
         super.open();

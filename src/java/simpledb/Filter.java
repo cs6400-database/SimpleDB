@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -36,7 +37,7 @@ public class Filter extends Operator {
         return child.getTupleDesc();
     }
 
-    public void open() throws DbException, NoSuchElementException,
+    public void open() throws DbException, NoSuchElementException, IOException, 
             TransactionAbortedException {
         // some code goes here
         child.open();

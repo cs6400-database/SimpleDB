@@ -6,7 +6,7 @@ import java.util.*;
  * BTreeScan is an operator which reads tuples in sorted order 
  * according to a predicate
  */
-public class BTreeScan implements OpIterator {
+public class BTreeScan implements DbIterator {
 
 	private static final long serialVersionUID = 1L;
 

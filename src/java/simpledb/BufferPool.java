@@ -20,6 +20,8 @@ public class BufferPool {
     /** Bytes per page, including header. */
     public static final int PAGE_SIZE = 4096;
 
+    private static int pageSize = PAGE_SIZE;
+
     /** Default number of pages passed to the constructor. This is used by
     other classes. BufferPool should use the numPages argument to the
     constructor instead. */
@@ -44,8 +46,18 @@ public class BufferPool {
     }
 
     public static int getPageSize() {
-        return PAGE_SIZE;
+        return pageSize;
     } 
+
+    // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING
+    public static void setPageSize(int pageSize) {
+        BufferPool.pageSize = pageSize;
+    } 
+
+    // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
+    public static void resetPageSize() {
+    	BufferPool.pageSize = PAGE_SIZE;
+    }
 
     /**
      * Retrieve the specified page with the associated permissions.
@@ -154,7 +166,7 @@ public class BufferPool {
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
         // some code goes here
-        HeapFile table = (HeapFile) Database.getCatalog().getDbFile(tableId);
+        DbFile table = (DbFile) Database.getCatalog().getDbFile(tableId);
         ArrayList<Page> affectedPages = table.insertTuple(tid, t);
         for (Page page : affectedPages) {
             page.markDirty(true, tid);
@@ -176,9 +188,9 @@ public class BufferPool {
      * @param t the tuple to add
      */
     public void deleteTuple(TransactionId tid, Tuple t)
-        throws DbException, TransactionAbortedException {
+        throws DbException, IOException, TransactionAbortedException {
         int tableId = t.getRecordId().getPageId().getTableId();
-        HeapFile table = (HeapFile) Database.getCatalog().getDbFile(tableId);
+        DbFile table = (DbFile) Database.getCatalog().getDbFile(tableId);
         ArrayList<Page> affectedPage = table.deleteTuple(tid, t);
         for (Page newPage : affectedPage) {
             newPage.markDirty(true, tid);
@@ -221,8 +233,8 @@ public class BufferPool {
         // some code goes here
         // not necessary for proj1
         Page page = pid2page.get(pid);
-        int tableId = ((HeapPageId)pid).getTableId();
-        HeapFile hf = (HeapFile)Database.getCatalog().getDbFile(tableId);
+        int tableId = ((PageId)pid).getTableId();
+        DbFile hf = (DbFile)Database.getCatalog().getDbFile(tableId);
         hf.writePage(page);
         page.markDirty(false, null);
     }

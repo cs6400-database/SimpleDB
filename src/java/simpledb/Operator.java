@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 
 /**
@@ -58,7 +59,7 @@ public abstract class Operator implements DbIterator {
     private boolean open = false;
     private int estimatedCardinality = 0;
 
-    public void open() throws DbException, TransactionAbortedException {
+    public void open() throws DbException, IOException, TransactionAbortedException {
         this.open = true;
     }
 

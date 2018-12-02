@@ -47,7 +47,7 @@ public class Insert extends Operator {
         return td;
     }
 
-    public void open() throws DbException, TransactionAbortedException {
+    public void open() throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         hasAccessed = false;
         child.open();

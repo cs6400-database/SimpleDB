@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -72,7 +73,7 @@ public class HashEquiJoin extends Operator {
     }
 
 
-    public void open() throws DbException, NoSuchElementException,
+    public void open() throws DbException, NoSuchElementException, IOException, 
             TransactionAbortedException {
         child1.open();
         child2.open();

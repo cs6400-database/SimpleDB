@@ -40,7 +40,7 @@ public class Delete extends Operator {
         return td;
     }
 
-    public void open() throws DbException, TransactionAbortedException {
+    public void open() throws DbException, IOException, TransactionAbortedException {
         // some code goes here
         child.open();
         super.open();

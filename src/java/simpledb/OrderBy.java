@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -53,7 +54,7 @@ public class OrderBy extends Operator {
         return td;
     }
 
-    public void open() throws DbException, NoSuchElementException,
+    public void open() throws DbException, NoSuchElementException, IOException, 
             TransactionAbortedException {
         child.open();
         // load all the tuples in a collection, and sort it

@@ -1,5 +1,5 @@
 package simpledb;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -16,7 +16,7 @@ public interface DbIterator extends Serializable{
    * @throws DbException when there are problems opening/accessing the database.
    */
   public void open()
-      throws DbException, TransactionAbortedException;
+      throws DbException, IOException, TransactionAbortedException;
 
   /** Returns true if the iterator has more tuples.
    * @return true f the iterator has more tuples.

@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -45,7 +46,7 @@ public class Project extends Operator {
         return td;
     }
 
-    public void open() throws DbException, NoSuchElementException,
+    public void open() throws DbException, NoSuchElementException, IOException, 
             TransactionAbortedException {
         child.open();
         super.open();
