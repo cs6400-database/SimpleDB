@@ -168,10 +168,11 @@ public class BufferPool {
         // some code goes here
         DbFile table = (DbFile) Database.getCatalog().getDbFile(tableId);
         ArrayList<Page> affectedPages = table.insertTuple(tid, t);
-        for (Page page : affectedPages) {
-            page.markDirty(true, tid);
+        for (Page newPage : affectedPages) {
+            newPage.markDirty(true, tid);
+            pid2page.remove(newPage.getId());
+            pid2page.put(newPage.getId(), newPage);
         }
-        // not necessary for proj1
     }
 
     /**
@@ -194,6 +195,8 @@ public class BufferPool {
         ArrayList<Page> affectedPage = table.deleteTuple(tid, t);
         for (Page newPage : affectedPage) {
             newPage.markDirty(true, tid);
+            pid2page.remove(newPage.getId());
+            pid2page.put(newPage.getId(), newPage);
         }
         // some code goes here
         // not necessary for proj1
