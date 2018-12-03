@@ -436,19 +436,21 @@ public class Parser {
                 throw new simpledb.ParsingException(
                         "No transaction is currently running");
             curtrans.commit();
-            curtrans = null;
-            inUserTrans = false;
             System.out.println("Transaction " + curtrans.getId().getId()
                     + " committed.");
+            curtrans = null;
+            inUserTrans = false;
+
         } else if (s.getStmtType().equals("ROLLBACK")) {
             if (curtrans == null)
                 throw new simpledb.ParsingException(
                         "No transaction is currently running");
+            System.out.println("Transaction " + curtrans.getId().getId()
+                    + " aborted.");
             curtrans.abort();
             curtrans = null;
             inUserTrans = false;
-            System.out.println("Transaction " + curtrans.getId().getId()
-                    + " aborted.");
+
 
         } else if (s.getStmtType().equals("SET TRANSACTION")) {
             if (curtrans != null)
