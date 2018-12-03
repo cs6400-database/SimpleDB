@@ -56,4 +56,14 @@ public interface Page {
      * copy current content to the before image.
      */
     public void setBeforeImage();
+
+    /**
+     * added for MVCC & 2PL CC
+     * this is trying to emulate mysql
+     *
+     * @return
+     */
+    public default int getVersion() {
+        return 0;
+    }
 }

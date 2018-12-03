@@ -96,7 +96,7 @@ public class LockManager {
         checkInitHoldTX(tid);
         //start to wait for write lock
         LockRecord readRecord = lockHoldMap.get(tid).get(pid);
-        if (readRecord != null && readRecord.getPermissions() == Permissions.READ_ONLY) {
+        if (readRecord != null && readRecord.getPermissions() == Permissions.READ_ONLY && readRecord.getThread() == Thread.currentThread()) {
             //lock update
             readRecord.getLock().unlock();
             lockHoldMap.get(tid).remove(pid);
@@ -133,14 +133,22 @@ public class LockManager {
     public boolean commitTX(TransactionId tid) {
         Map<PageId, LockRecord> detail = lockHoldMap.remove(tid);
         if (detail != null) {
-            for (Map.Entry<PageId, LockRecord> entry : detail.entrySet()) {
+            for (Map.Entry<PageId, ReadWriteLock> entry : lockMap.entrySet()) {
+                try {
 
-                if (entry.getValue().getThread() == Thread.currentThread())
-                    entry.getValue().getLock().unlock();
+                    entry.getValue().readLock().unlock();
+                } catch (Exception e) {
+                }
+                try {
+                    entry.getValue().writeLock().unlock();
+                } catch (Exception e) {
+                }
+
 
 
             }
         }
+
         lockWaitMap.remove(tid);
         return true;
     }

@@ -24,6 +24,7 @@
         <pathelement location="${lib}/mina-core-2.0.4.jar"/>
         <pathelement location="${lib}/mina-filter-compression-2.0.4.jar"/>
         <pathelement location="${lib}/slf4j-api-1.6.1.jar"/>
+        <pathelement location="${lib}/concurrent-locks-1.0.0.jar"/>
     </path>
 
     <path id="classpath.test">

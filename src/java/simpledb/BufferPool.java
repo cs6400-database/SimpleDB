@@ -77,12 +77,14 @@ public class BufferPool {
     public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
 
-
-        lockManager.grantWriteLock(tid, pid);
-        if (!txUsedPage.containsKey(tid))
-            txUsedPage.put(tid, new HashSet<>());
-        txUsedPage.get(tid).add(pid);
-
+        if (perm == Permissions.READ_ONLY) {
+            lockManager.grantReadLock(tid, pid);
+        } else {
+            lockManager.grantWriteLock(tid, pid);
+            if (!txUsedPage.containsKey(tid))
+                txUsedPage.put(tid, new HashSet<>());
+            txUsedPage.get(tid).add(pid);
+        }
 
         if (!pid2page.containsKey(pid)) {
             if (pid2page.size() == numPages) {

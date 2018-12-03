@@ -1,7 +1,11 @@
 package simpledb;
 
-import java.util.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Each instance of HeapPage stores data for one page of HeapFiles and 
@@ -18,6 +22,8 @@ public class HeapPage implements Page {
     byte header[];
     Tuple tuples[];
     int numSlots;
+
+    private volatile AtomicInteger version = new AtomicInteger(0);
 
     private TransactionId lastDirtyOperation;
 
@@ -232,6 +238,7 @@ public class HeapPage implements Page {
     public void deleteTuple(Tuple t) throws DbException {
         // some code goes here
         // not necessary for lab1
+        version.incrementAndGet();
         RecordId tid = t.getRecordId();
         HeapPageId hpid = (HeapPageId) tid.getPageId();
         int tupleNum = tid.tupleno();
@@ -240,6 +247,7 @@ public class HeapPage implements Page {
         }
         tuples[tupleNum] = null;
         markSlotUsed(tupleNum, false);
+
     }
 
     /**
@@ -250,9 +258,11 @@ public class HeapPage implements Page {
      * @param t The tuple to add.
      */
     public void insertTuple(Tuple t) throws DbException {
+
         // some code goes here
         // not necessary for lab1
         if (!td.equals(t.getTupleDesc())) throw new DbException("tupleDesc is mismatch");
+        version.incrementAndGet();
         for (int i = 0; i < getNumTuples(); i++) {
             if (!isSlotUsed(i)) {
                 tuples[i] = t;
@@ -322,6 +332,11 @@ public class HeapPage implements Page {
         int byteNum = i / 8;
         int posInByte = i % 8;
         header[byteNum] = editBitInByte(header[byteNum], posInByte, value);
+    }
+
+    @Override
+    public int getVersion() {
+        return version.get();
     }
 
     /**

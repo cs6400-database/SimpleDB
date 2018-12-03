@@ -114,22 +114,8 @@ public class BTreeDeadlockTest extends SimpleDbTestBase {
 
 			if(writer1.succeeded() || writer2.succeeded()) break;
 
-			if (writer1.getError() != null) {
-				writer1 = null;
-				bp.transactionComplete(tid1);
-				Thread.sleep(rand.nextInt(WAIT_INTERVAL));
-
-				tid1 = new TransactionId();
-				writer1 = startWriter(tid1, item1, count1);
-			}
-
-			if (writer2.getError() != null) {
-				writer2 = null;
-				bp.transactionComplete(tid2);
-				Thread.sleep(rand.nextInt(WAIT_INTERVAL));
-
-				tid2 = new TransactionId();
-				writer2 = startWriter(tid2, item2, count2);
+			if (writer1.getError() != null || writer2.getError() != null) {
+				break;
 			}
 
 		}
