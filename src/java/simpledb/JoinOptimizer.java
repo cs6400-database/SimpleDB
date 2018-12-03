@@ -266,6 +266,9 @@ public class JoinOptimizer {
                 }
             }
         }
+        if(pc.getOrder(wholeSet)==null){
+            return new Vector<LogicalJoinNode>();
+        }
         return pc.getOrder(wholeSet);
     }
 
