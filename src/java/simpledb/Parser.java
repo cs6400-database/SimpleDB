@@ -548,6 +548,7 @@ public class Parser {
                                 + curtrans.getId().getId()
                                 + " aborted because of unhandled error");
                     }
+                    a.printStackTrace();
                     this.inUserTrans = false;
 
                     if (a instanceof simpledb.ParsingException
@@ -626,6 +627,7 @@ public class Parser {
                                 + " aborted because of unhandled error");
                     }
                     this.inUserTrans = false;
+                    a.printStackTrace();
 
                     if (a instanceof simpledb.ParsingException
                             || a instanceof Zql.ParseException)
@@ -668,6 +670,7 @@ public class Parser {
         }
 
         Parser p = new Parser();
+        System.out.println(argv);
 
         p.start(argv);
     }
