@@ -138,11 +138,14 @@ public class BufferPool {
         if (commit) {
             flushPages(tid);
             Set<PageId> pageids = txUsedPage.get(tid);
-            for (PageId pageid : pageids) {
-                Page newPage = pid2page.get(pageid);
-                newPage.setBeforeImage();
+            if (pageids != null) {
+                for (PageId pageid : pageids) {
+                    Page newPage = pid2page.get(pageid);
+                    if (newPage != null) {
+                        newPage.setBeforeImage();
+                    }
+                }
             }
-
         } else {
             discardPages(tid);
         }
