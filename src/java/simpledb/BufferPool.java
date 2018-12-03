@@ -135,11 +135,14 @@ public class BufferPool {
      */
     public void transactionComplete(TransactionId tid, boolean commit)
         throws IOException {
-        // some code goes here
-        // not necessary for proj1
-
         if (commit) {
             flushPages(tid);
+            Set<PageId> pageids = txUsedPage.get(tid);
+            for (PageId pageid : pageids) {
+                Page newPage = pid2page.get(pageid);
+                newPage.setBeforeImage();
+            }
+
         } else {
             discardPages(tid);
         }
